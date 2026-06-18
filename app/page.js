@@ -37,7 +37,17 @@ export default function VaultPage() {
     setLoading(true)
     let result
     if (type === 'signup') {
-      result = await supabase.auth.signUp({ email, password })
+      // Sign up and auto-login without email verification
+      result = await supabase.auth.signUp({ 
+        email, 
+        password,
+        options: { emailRedirectTo: window.location.origin }
+      })
+      // Automatically sign in after signup
+      if (!result.error && result.data.user) {
+        const signInResult = await supabase.auth.signInWithPassword({ email, password })
+        result = signInResult
+      }
     } else {
       result = await supabase.auth.signInWithPassword({ email, password })
     }
